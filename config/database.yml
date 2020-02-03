@@ -10,12 +10,12 @@ default: &default
 
 development:
   <<: *default
-  database: YOUR_PROJECT_development
+  database: happy_youtube_watcher_development
 
 test:
   <<: *default
-  database: YOUR_PROJECT_test
+  database: happy_youtube_watcher_test
 
 production:
   <<: *default
-  database: <%= ENV.fetch("DATABASE_URL") { 'YOUR_PROJECT_production' } %>
+  database: <%= ENV.fetch("DATABASE_URL") { 'happy_youtube_watcher_production' } %>
