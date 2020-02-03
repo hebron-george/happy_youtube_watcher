@@ -1,0 +1,2 @@
+class PlaylistSnapshot < ApplicationRecord
+end
