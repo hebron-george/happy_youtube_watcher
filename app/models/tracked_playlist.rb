@@ -1,0 +1,2 @@
+class TrackedPlaylist < ApplicationRecord
+end
