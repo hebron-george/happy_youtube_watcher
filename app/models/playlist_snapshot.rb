@@ -10,12 +10,11 @@ class PlaylistSnapshot < ApplicationRecord
   end
 
   def self.create_snapshot!(playlist_id)
-    playlist_id = 'FL7B_s7wxX-D__fkTiYp3Oaw'
-
-    playlist = Yt::Playlist.new(id: playlist_id)
-    channel_id = playlist.channel_id
-    all_songs = playlist.playlist_items.where;
+    playlist       = Yt::Playlist.new(id: playlist_id)
+    channel_id     = playlist.channel_id
+    all_songs      = playlist.playlist_items.where;
     playlist_items = {}
+
     all_songs.each do |song|
       song_id = song.snippet.data['resourceId']['videoId']
       playlist_items[song_id] = song.snippet.data
