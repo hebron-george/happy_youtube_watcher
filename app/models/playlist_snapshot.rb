@@ -4,11 +4,17 @@ class PlaylistSnapshot < ApplicationRecord
   BROKEN_STATUSES = ['Deleted video', 'Private video']
 
   # attr_accessor :playlist_id, :channel_id, :playlist_items
-  def self.create_snapshot!
-    playlist_id = 'FL7B_s7wxX-D__fkTiYp3Oaw'
-    channel_id  = 'UC7B_s7wxX-D__fkTiYp3Oaw'
 
-    all_songs = Yt::Playlist.new(id: playlist_id).playlist_items.where;
+  def self.capture_all_tracked_playlists!
+    TrackedPlaylist.all.each { |tp| create_snapshot!(tp.playlist_id) }
+  end
+
+  def self.create_snapshot!(playlist_id)
+    playlist_id = 'FL7B_s7wxX-D__fkTiYp3Oaw'
+
+    playlist = Yt::Playlist.new(id: playlist_id)
+    channel_id = playlist.channel_id
+    all_songs = playlist.playlist_items.where;
     playlist_items = {}
     all_songs.each do |song|
       song_id = song.snippet.data['resourceId']['videoId']
