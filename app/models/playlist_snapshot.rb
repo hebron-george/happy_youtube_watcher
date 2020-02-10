@@ -32,4 +32,10 @@ class PlaylistSnapshot < ApplicationRecord
       BROKEN_STATUSES.include?(song['title'])
     end
   end
+
+  def working_songs
+    playlist_items.reject do |_song_id, song|
+      BROKEN_STATUSES.include?(song['title'])
+    end
+  end
 end
