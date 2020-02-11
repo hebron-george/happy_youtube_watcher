@@ -10,7 +10,7 @@ class PlaylistsController < ApplicationController
     shuffled_video_list = {
       video_ids: @playlist.working_songs.keys.shuffle,
     }
-    
+
     json_response(shuffled_video_list)
   end
 end
