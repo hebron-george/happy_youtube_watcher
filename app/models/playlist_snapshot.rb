@@ -38,4 +38,17 @@ class PlaylistSnapshot < ApplicationRecord
       BROKEN_STATUSES.include?(song['title'])
     end
   end
+
+  def shuffled_working_songs
+    keys = working_songs.keys.shuffle
+    results = []
+    keys.each do |k|
+      song = working_songs[k]
+      results << {
+        title:    song.dig('title'),
+        video_id: k,
+      }
+    end
+    results
+  end
 end

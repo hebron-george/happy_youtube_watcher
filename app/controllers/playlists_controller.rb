@@ -8,7 +8,7 @@ class PlaylistsController < ApplicationController
     json_response({error_message: 'We could not find that playlist', playlist_id: params[:playlist_id]},:not_found) and return unless @playlist
 
     shuffled_video_list = {
-      video_ids: @playlist.working_songs.keys.shuffle,
+      songs: @playlist.shuffled_working_songs,
     }
 
     json_response(shuffled_video_list)
