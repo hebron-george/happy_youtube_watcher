@@ -59,3 +59,4 @@ gem 'yt', '~> 0.32.5'
 gem 'pry-rails'
 
 gem 'rack-cors'
+gem 'slack-ruby-client'
