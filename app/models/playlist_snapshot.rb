@@ -34,8 +34,8 @@ class PlaylistSnapshot < ApplicationRecord
     previous_snapshot = PlaylistSnapshot.where(playlist_id: snapshot.playlist_id).where("created_at < ?", snapshot.created_at).newest
     return unless previous_snapshot
 
-    previous_songs = previous_snapshot.playlist_items.map { |_video_id, song| song.dig('title') }
-    current_songs  = snapshot.playlist_items.map { |_vid, song| song.dig('title') }
+    previous_songs = previous_snapshot.working_songs.dup.with_indifferent_access
+    current_songs  = snapshot.working_songs.dup.with_indifferent_access
 
     diffs = calculate_diffs(current_songs, previous_songs)
     message = create_diff_message(diffs, snapshot.playlist_id)
@@ -44,20 +44,23 @@ class PlaylistSnapshot < ApplicationRecord
   end
 
   def self.calculate_diffs(current_songs, previous_songs)
+
+    removed = previous_songs.reject { |k,_v| current_songs.key?(k) }.values.map(&:with_indifferent_access)
+    added   = current_songs.reject  { |k,_v| previous_songs.key?(k) }.values.map(&:with_indifferent_access)
     {
-      removed: previous_songs - current_songs,
-      added:   current_songs - previous_songs
+      removed: removed,
+      added:   added,
     }
   end
 
   def self.create_diff_message(diffs, playlist_id)
-    s = [""]
-    s += ["These songs were removed:\n ```#{diffs[:removed].join("\n")}```"] if diffs[:removed].any?
-    s += ["These songs were added:\n```#{diffs[:added].join("\n")}```"] if diffs[:added].any?
-    s = s.join("\n")
+    s =  [""]
+    s += ["These songs were removed:\n ```#{diffs[:removed].map { |song| "Position: #{song[:position]} - #{song[:title]}"}.join("\n")}```"] if diffs[:removed].any?
+    s += ["These songs were added:\n```#{diffs[:added].map { |song| "Position: #{song[:position]} - #{song[:title]}"}.join("\n")}```"]      if diffs[:added].any?
 
     return s if s.length.zero?
 
+    s = s.join("\n")
     s = "Playlist (https://youtube.com/playlist?list=#{playlist_id}) - #{Date.today.readable_inspect}\n\n" + s
   end
 
