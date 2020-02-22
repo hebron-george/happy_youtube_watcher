@@ -39,7 +39,7 @@ class PlaylistSnapshot < ApplicationRecord
 
     diffs = calculate_diffs(current_songs, previous_songs)
     message = create_diff_message(diffs, snapshot.playlist_id)
-
+    
     ::YoutubeWatcher::Slacker.post_message(message, '#happy-hood')
   end
 
@@ -58,7 +58,7 @@ class PlaylistSnapshot < ApplicationRecord
     s += ["These songs were removed:\n ```#{diffs[:removed].map { |song| "Position: #{song[:position]} - #{song[:title]}"}.join("\n")}```"] if diffs[:removed].any?
     s += ["These songs were added:\n```#{diffs[:added].map { |song| "Position: #{song[:position]} - #{song[:title]}"}.join("\n")}```"]      if diffs[:added].any?
 
-    return s if s.length.zero?
+    return '' unless s.count > 1 # Not just empty string
 
     s = s.join("\n")
     s = "Playlist (https://youtube.com/playlist?list=#{playlist_id}) - #{Date.today.readable_inspect}\n\n" + s
