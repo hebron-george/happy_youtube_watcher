@@ -16,8 +16,8 @@ module YoutubeWatcher
     def self.icon_emoji
       # Just the essentials for now ayylmao
       s = [:ayylmao, :ayy_lmao, :bruh, :ceilingcat, :chef, :clapping, :dab2, :dabmas, :dude_suh, :elon, :erbefe2,
-       :fidget_spinner, :gran, :italian_kissy_fingers, :kappa, :lolwut, :mother_of_god, :nani_pepe, :okaychamp, :pepega,
-       :pepelaugh, :shaka, :slippin, :squiddab, :suh_dude, :teamwork, :vapeweedeveryday, :vegeta, :wutface].sample
+       :fidget_spinner, :gran, :italian_kissy_fingers, :kappa, :lolwut, :mother_of_god, :okaychamp,
+       :shaka, :slippin, :squiddab, :suh_dude, :teamwork, :vapeweedeveryday, :vegeta, :wutface].sample
 
       ":#{s}:"
     end
