@@ -66,7 +66,7 @@ class PlaylistSnapshot < ApplicationRecord
 
   def self.shuffle_playlists(playlist_ids)
     playlists = playlist_ids.map { |id| PlaylistSnapshot.where(playlist_id: id).newest }.compact
-    playlists.map(&:shuffled_working_songs).flatten.compact.shuffle
+    playlists.flat_map(&:shuffled_working_songs).compact.shuffle
   end
 
   def broken_songs
