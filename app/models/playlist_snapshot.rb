@@ -64,6 +64,11 @@ class PlaylistSnapshot < ApplicationRecord
     s = "Playlist (https://youtube.com/playlist?list=#{playlist_id}) - #{Date.today.readable_inspect}\n\n" + s
   end
 
+  def self.shuffle_playlists(playlist_ids)
+    playlists = playlist_ids.map { |id| PlaylistSnapshot.where(playlist_id: id).newest }.compact
+    playlists.map(&:shuffled_working_songs).flatten.compact.shuffle
+  end
+
   def broken_songs
     playlist_items.select do |_song_id, song|
       BROKEN_STATUSES.include?(song['title'])

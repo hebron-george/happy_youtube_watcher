@@ -4,11 +4,9 @@ class PlaylistsController < ApplicationController
   # Shuffle's a given youtube playlist for you
   def shuffle
     playlist_ids = params[:playlist_ids]&.split(',')
-    @playlists = PlaylistSnapshot.where(playlist_id: playlist_ids)
-    json_response({error_message: 'Could not find the playlist(s)!', playlist_id: params[:playlist_id]},:not_found) and return unless @playlists
 
     shuffled_video_list = {
-      songs: @playlists.map(&:shuffled_working_songs).flatten.compact.shuffle,
+      songs: PlaylistSnapshot.shuffle_playlists(playlist_ids),
     }
 
     json_response(shuffled_video_list)
