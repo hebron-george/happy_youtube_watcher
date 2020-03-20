@@ -4,8 +4,6 @@ class PlaylistsController < ApplicationController
   # Shuffle's a given youtube playlist for you
   def shuffle
     playlist_ids = params[:playlist_ids]
-    puts "[HEBRON] Here are params: #{params}"
-    puts "[HEBRON] Here are playlist ids: #{playlist_ids}"
     shuffled_video_list = {
       songs: PlaylistSnapshot.shuffle_playlists(playlist_ids),
     }
