@@ -55,8 +55,8 @@ class PlaylistSnapshot < ApplicationRecord
 
   def self.create_diff_message(diffs, playlist_id)
     s =  [""]
-    s += ["These songs were removed:\n ```#{diffs[:removed].map { |song| "Position: #{song[:position]} - #{song[:title]}"}.join("\n")}```"] if diffs[:removed].any?
-    s += ["These songs were added:\n```#{diffs[:added].map { |song| "Position: #{song[:position]} - #{song[:title]}"}.join("\n")}```"]      if diffs[:added].any?
+    s += ["These songs were removed:\n ```#{diffs[:removed].map { |song| "Position: #{song[:position]} - #{song[:title]} - ID(#{song.dig(:resourceId, :videoId)})"}.join("\n")}```"] if diffs[:removed].any?
+    s += ["These songs were added:\n```#{diffs[:added].map { |song| "Position: #{song[:position]} - #{song[:title]} - ID(#{song.dig(:resourceId, :videoId)})"}.join("\n")}```"]      if diffs[:added].any?
 
     return '' unless s.count > 1 # Not just empty string
 
