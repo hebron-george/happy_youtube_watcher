@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_03_020015) do
+ActiveRecord::Schema.define(version: 2020_04_05_002500) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -53,6 +53,7 @@ ActiveRecord::Schema.define(version: 2020_04_03_020015) do
     t.string "name"
     t.index ["is_default"], name: "index_tracked_playlists_on_is_default"
     t.index ["name"], name: "index_tracked_playlists_on_name"
+    t.index ["playlist_id"], name: "index_tracked_playlists_on_playlist_id", unique: true
   end
 
 end
