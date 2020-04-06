@@ -2,9 +2,8 @@ require 'yt'
 require 'youtube_watcher/slacker'
 
 class PlaylistSnapshot < ApplicationRecord
+  belongs_to :tracked_playlist, foreign_key: :playlist_id, primary_key: :playlist_id
   BROKEN_STATUSES = ['Deleted video', 'Private video']
-
-  # attr_accessor :playlist_id, :channel_id, :playlist_items
 
   def self.capture_all_tracked_playlists!
     TrackedPlaylist.all.each { |tp| ps = create_snapshot!(tp.playlist_id); post_diff!(ps); }
