@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_05_002500) do
+ActiveRecord::Schema.define(version: 2020_04_06_141309) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -21,6 +21,7 @@ ActiveRecord::Schema.define(version: 2020_04_05_002500) do
     t.jsonb "playlist_items"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["playlist_id"], name: "index_playlist_snapshots_on_playlist_id"
   end
 
   create_table "playlists", force: :cascade do |t|
