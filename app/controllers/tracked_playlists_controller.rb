@@ -5,7 +5,14 @@ class TrackedPlaylistsController < ApplicationController
   end
 
   def create
-    tp = TrackedPlaylist.create!(playlist_id: params[:playlist_id], name: params[:playlist_name])
+    playlist_info = Yt::Playlist.new(id: params[:playlist_id])
+
+    tp = TrackedPlaylist.create!(
+      playlist_id: params[:playlist_id],
+      name:        "#{playlist_info.channel_title} - #{playlist_info.title}",
+      is_default:  !!params[:is_default]
+    )
+
     json_response(tp, :created)
   end
 end
