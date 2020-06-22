@@ -97,7 +97,8 @@ class PlaylistSnapshot < ApplicationRecord
 
   # Helpers that can eventually be refactored out of this class
 
-  def url(id)
+  def self.url(id)
+    # TODO: This method is presentation logic, needs to move out of the model
     "https://youtube.com/watch?v=#{id}"
   end
 end
