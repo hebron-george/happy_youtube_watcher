@@ -2,32 +2,92 @@
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
 # documentation.
-# This workflow will download a prebuilt Ruby version, install dependencies and run tests with Rake
-# For more information see: https://github.com/marketplace/actions/setup-ruby-jruby-and-truffleruby
+#This workflow runs two separate jobs, one to lint with Rubocop, the other to test with Rspec
+env:
+  RUBY_VERSION: '2.5.1'
 
-name: Ruby
+name: Ruby CI
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+# Trigger the workflow on push or pull request
+on: [push, pull_request]
 
-jobs:
-  test:
-
+jobs: 
+  rubocop-lint:
+    name: Rubocop
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        ruby: ['2.4', '2.5', '2.6', '2.7']
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Ruby
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Setup Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: ${{ matrix.ruby }}
-    - name: Install dependencies
-      run: bundle install
-    - name: Run tests
-      run: bundle exec rake
+        ruby-version: ${{ env.RUBY_VERSION }}
+
+    - name: Install Rubocop
+      run: gem install rubocop
+
+    - name: Run Rubocop
+      run: rubocop
+      # Allow Rubocop to run without breaking the workflow
+      continue-on-error: true
+
+  rspec-test:
+    name: Rspec
+    # Containers must run in Linux based operating systems
+    runs-on: ubuntu-latest 
+    # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ env.RUBY_VERSION }}
+
+    - name: Install Gemfile dependencies
+      run: |
+        gem install bundler:'2.0.2'
+        bundler install
+
+    - name: Install postgres client
+      run: sudo apt-get install libpq-dev
+
+    - name: Run database setup
+      run: |
+        bundler exec rails db:create RAILS_ENV=test
+        bundler exec rails db:migrate RAILS_ENV=test
+      env:
+        # The hostname used to communicate with the PostgreSQL service container
+        POSTGRES_HOST: localhost
+        # The default PostgreSQL port
+        POSTGRES_PORT: 5432
+
+    - name: Run Rspec tests
+      run: |
+        bundler exec rspec
+
+    - name: Upload coverage results    
+      uses: actions/upload-artifact@master
+      if: always()
+      with:
+        name: coverage-report
+        path: coverage
