@@ -45,6 +45,8 @@ jobs:
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: postgres
+          DB_USERNAME: happy_youtube_watcher_test
+          DB_PASSWORD: happy_youtube_watcher_test
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
