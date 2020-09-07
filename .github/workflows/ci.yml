@@ -63,11 +63,6 @@ jobs:
       with:
         ruby-version: ${{ env.RUBY_VERSION }}
 
-#    - name: Install Gemfile dependencies
-#      run: |
-#        gem install bundler:'2.0.2'
-#        bundler install
-
     - name: Cache Ruby Gems
       uses: actions/cache@v2
       with:
