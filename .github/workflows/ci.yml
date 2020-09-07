@@ -66,10 +66,23 @@ jobs:
       with:
         ruby-version: ${{ env.RUBY_VERSION }}
 
-    - name: Install Gemfile dependencies
-      run: |
-        gem install bundler:'2.0.2'
-        bundler install
+#    - name: Install Gemfile dependencies
+#      run: |
+#        gem install bundler:'2.0.2'
+#        bundler install
+
+    - name: Cache Ruby Gems
+        uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+        - name: Bundle Install
+          run: |
+            bundle config path vendor/bundle
+            bundle install --jobs 4 --retry 3
 
     - name: Install postgres client
       run: sudo apt-get install libpq-dev
