@@ -69,28 +69,28 @@ class PlaylistSnapshot < ApplicationRecord
   end
 
   def broken_songs
-    playlist_items.select do |_song_id, song|
+    @broken_songs ||= playlist_items.select do |_song_id, song|
       BROKEN_STATUSES.include?(song['title'])
     end
   end
 
   def working_songs
-    playlist_items.reject do |_song_id, song|
+    @working_songs ||= playlist_items.reject do |_song_id, song|
       BROKEN_STATUSES.include?(song['title'])
     end
   end
 
   def shuffled_working_songs
-    keys = working_songs.keys.shuffle
-    results = []
-    keys.each do |k|
-      song = working_songs[k]
-      results << {
-        title:    song.dig('title'),
-        video_id: k,
+    songs = working_songs.slice(*working_songs.keys.shuffle)
+    songs.map do |video_id, song_info|
+      {
+        title:       song_info.dig('title'),
+        video_id:    video_id,
+        playlist_id: playlist_id,
+        description: song_info.dig('description'),
+        playlist_owner: song_info.dig('channelTitle'),
       }
     end
-    results
   end
 
   private
