@@ -15,8 +15,6 @@ development:
 test:
   <<: *default
   database: happy_youtube_watcher_test
-  username: postgres
-  password: postgres
 
 production:
   <<: *default

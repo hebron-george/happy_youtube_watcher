@@ -63,10 +63,19 @@ jobs:
       with:
         ruby-version: ${{ env.RUBY_VERSION }}
 
-    - name: Install Gemfile dependencies
+    - name: Cache Ruby Gems
+      uses: actions/cache@v2
+      with:
+        path: vendor/bundle
+        key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-gems-
+
+    - name: Bundle Install
       run: |
         gem install bundler:'2.0.2'
-        bundler install
+        bundle config path vendor/bundle
+        bundle install --jobs 4 --retry 3
 
     - name: Install postgres client
       run: sudo apt-get install libpq-dev
@@ -80,10 +89,19 @@ jobs:
         POSTGRES_HOST: localhost
         # The default PostgreSQL port
         POSTGRES_PORT: 5432
+        DB_USERNAME: postgres
+        DB_PASSWORD: postgres
 
     - name: Run Rspec tests
       run: |
         bundler exec rspec
+      env:
+        # The hostname used to communicate with the PostgreSQL service container
+        POSTGRES_HOST: localhost
+        # The default PostgreSQL port
+        POSTGRES_PORT: 5432
+        DB_USERNAME: postgres
+        DB_PASSWORD: postgres
 
     - name: Upload coverage results    
       uses: actions/upload-artifact@master
