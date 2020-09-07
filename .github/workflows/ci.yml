@@ -100,6 +100,13 @@ jobs:
     - name: Run Rspec tests
       run: |
         bundler exec rspec
+      env:
+        # The hostname used to communicate with the PostgreSQL service container
+        POSTGRES_HOST: localhost
+        # The default PostgreSQL port
+        POSTGRES_PORT: 5432
+        DB_USERNAME: postgres
+        DB_PASSWORD: postgres
 
     - name: Upload coverage results    
       uses: actions/upload-artifact@master
