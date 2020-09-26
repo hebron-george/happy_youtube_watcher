@@ -4,4 +4,6 @@ Rails.application.routes.draw do
   post '/shuffle',           to: 'playlists#shuffle'
   get '/tracked-playlists',  to: 'tracked_playlists#index'
   post '/tracked-playlists', to: 'tracked_playlists#create'
+
+  get '/videos',             to: 'videos#index'
 end
