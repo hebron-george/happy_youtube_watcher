@@ -25,6 +25,7 @@ The solution? Happy Youtube Watcher.
     - DB_PASSWORD
     - DB_HOST (optional)
     - DB_PORT (optional)
+    - YT_API_KEY (required for youtube api calls)
 
 6. Run `rails db:setup` to setup the database
 
