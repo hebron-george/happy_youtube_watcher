@@ -73,6 +73,7 @@ jobs:
 
     - name: Bundler Config
       run: |
+        gem install bundler:'2.0.2'
         bundle config path vendor/bundle
         bundle install --jobs 4 --retry 3
 
