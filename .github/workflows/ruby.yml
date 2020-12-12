@@ -2,35 +2,22 @@
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
 # documentation.
-#This workflow runs two separate jobs, one to lint with Rubocop, the other to test with Rspec
+# This workflow will download a prebuilt Ruby version, install dependencies and run tests with Rake
+# For more information see: https://github.com/marketplace/actions/setup-ruby-jruby-and-truffleruby
 
-name: Ruby CI
+name: Ruby
 
-# Trigger the workflow on push or pull request
-on: [push, pull_request]
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
-jobs: 
-  rubocop-lint:
-    name: Rubocop
+jobs:
+  test:
+
     runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      
-    - name: Setup Ruby
-      uses: ruby/setup-ruby@v1
 
-    - name: Install Rubocop
-      run: gem install rubocop
-
-    - name: Run Rubocop
-      run: rubocop
-      # Allow Rubocop to run without breaking the workflow
-      continue-on-error: true
-
-  rspec-test:
-    name: Rspec
-    runs-on: ubuntu-latest 
     services:
       postgres:
         # Docker Hub image
@@ -46,12 +33,16 @@ jobs:
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
-    - name: Setup Ruby
-      uses: ruby/setup-ruby@v1
+    
+    - name: Set up Ruby
+    # To automatically get bug fixes and new Ruby versions for ruby/setup-ruby,
+    # change this to (see https://github.com/ruby/setup-ruby#versioning):
+    # uses: ruby/setup-ruby@v1
+      uses: ruby/setup-ruby@21351ecc0a7c196081abca5dc55b08f085efe09a
 
     - name: Cache Ruby Gems
       uses: actions/cache@v2
@@ -78,18 +69,10 @@ jobs:
         DB_USERNAME: postgres
         DB_PASSWORD: postgres
 
-    - name: Run Rspec tests
-      run: |
-        bundler exec rspec
+    - name: Run tests
+      run: bundle exec rspec
       env:
         POSTGRES_HOST: localhost
         POSTGRES_PORT: 5432
         DB_USERNAME: postgres
         DB_PASSWORD: postgres
-
-    - name: Upload coverage results    
-      uses: actions/upload-artifact@master
-      if: always()
-      with:
-        name: coverage-report
-        path: coverage
