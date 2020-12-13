@@ -1,0 +1,3 @@
+class PlaylistSetting < ApplicationRecord
+    
+end

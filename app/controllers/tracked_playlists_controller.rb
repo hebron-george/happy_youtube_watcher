@@ -13,7 +13,7 @@ class TrackedPlaylistsController < ApplicationController
       is_default:  !!params[:is_default]
     )
 
-    PlaylistSnapshot.create_snapshot(params[:playlist_id])
+    PlaylistSnapshot.create_snapshot!(params[:playlist_id])
 
     json_response(tp, :created)
   end

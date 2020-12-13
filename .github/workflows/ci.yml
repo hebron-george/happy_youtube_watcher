@@ -3,8 +3,6 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 #This workflow runs two separate jobs, one to lint with Rubocop, the other to test with Rspec
-env:
-  RUBY_VERSION: '2.5.1'
 
 name: Ruby CI
 
@@ -21,8 +19,6 @@ jobs:
       
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: ${{ env.RUBY_VERSION }}
 
     - name: Install Rubocop
       run: gem install rubocop
@@ -34,15 +30,11 @@ jobs:
 
   rspec-test:
     name: Rspec
-    # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest 
-    # Service containers to run with `container-job`
     services:
-      # Label used to access the service container
       postgres:
         # Docker Hub image
         image: postgres
-        # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: postgres
         # Set health checks to wait until postgres has started
@@ -60,8 +52,6 @@ jobs:
 
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: ${{ env.RUBY_VERSION }}
 
     - name: Cache Ruby Gems
       uses: actions/cache@v2
@@ -73,21 +63,17 @@ jobs:
 
     - name: Bundler Config
       run: |
-        gem install bundler:'2.0.2'
+        gem install bundler -v "$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -n 1)"
         bundle config path vendor/bundle
         bundle install --jobs 4 --retry 3
 
-    - name: Install postgres client
-      run: sudo apt-get install libpq-dev
-
     - name: Run database setup
       run: |
+        sudo apt-get install libpq-dev
         bundler exec rails db:create RAILS_ENV=test
         bundler exec rails db:migrate RAILS_ENV=test
       env:
-        # The hostname used to communicate with the PostgreSQL service container
         POSTGRES_HOST: localhost
-        # The default PostgreSQL port
         POSTGRES_PORT: 5432
         DB_USERNAME: postgres
         DB_PASSWORD: postgres
@@ -96,9 +82,7 @@ jobs:
       run: |
         bundler exec rspec
       env:
-        # The hostname used to communicate with the PostgreSQL service container
         POSTGRES_HOST: localhost
-        # The default PostgreSQL port
         POSTGRES_PORT: 5432
         DB_USERNAME: postgres
         DB_PASSWORD: postgres
