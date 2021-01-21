@@ -7,4 +7,6 @@ Rails.application.routes.draw do
   post '/playlist-settings', to: 'playlist_settings#create'
 
   get '/videos',             to: 'videos#index'
+
+  get '/stats',              to: 'stats#index'
 end
