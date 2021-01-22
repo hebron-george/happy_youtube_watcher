@@ -3,3 +3,9 @@
 
 <h3>Playlist Snapshot count</h3>
 <%= pie_chart PlaylistSnapshot.joins(:tracked_playlist).group(:name).count %>
+
+
+<!--# Songs per playlist? -->
+
+<h3>Songs In Playlist</h3>
+<%= pie_chart @songs_in_playlists %>
