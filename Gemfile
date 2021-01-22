@@ -62,3 +62,6 @@ gem 'pry-rails'
 
 gem 'rack-cors'
 gem 'slack-ruby-client'
+
+gem 'chartkick'
+gem 'groupdate'
