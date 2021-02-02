@@ -66,5 +66,6 @@ gem 'slack-ruby-client'
 gem 'chartkick'
 gem 'groupdate'
 
+gem 'sentry-raven'
 gem 'sentry-ruby'
 gem 'sentry-rails'
