@@ -25,5 +25,6 @@ module PlaylistHistory
         removed:       changes[:removed],
       }
     end
+    history
   end
 end
