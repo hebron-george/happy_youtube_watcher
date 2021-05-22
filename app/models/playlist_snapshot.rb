@@ -15,13 +15,13 @@ class PlaylistSnapshot < ApplicationRecord
 
       if diff.fetch(:removed).any? || diff.fetch(:added).any?
         PlaylistSnapshot.create!(playlist_id: tp.playlist_id, playlist_items: current_playlist_items)
-        post_diff!(diff)
+        post_diff!(diff, tp.playlist_id)
       end
     end
   end
 
-  def self.post_diff!(diffs)
-    message = create_diff_message(diffs, snapshot.playlist_id)
+  def self.post_diff!(diffs, playlist_id)
+    message = create_diff_message(diffs, playlist_id)
     ::YoutubeWatcher::Slacker.post_message(message, '#happy-hood')
   end
 
