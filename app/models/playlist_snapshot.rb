@@ -21,7 +21,7 @@ class PlaylistSnapshot < ApplicationRecord
   end
 
   def self.post_diff!(diffs, playlist_id)
-    message = create_diff_message(diffs, playlist_id)
+    message = create_diff_message(diffs.with_indifferent_access, playlist_id)
     ::YoutubeWatcher::Slacker.post_message(message, '#happy-hood')
   end
 
