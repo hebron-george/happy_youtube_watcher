@@ -10,10 +10,14 @@ class TrackedPlaylistsController < ApplicationController
     tp = TrackedPlaylist.create!(
       playlist_id: params[:playlist_id],
       name:        "#{playlist_info.channel_title} - #{playlist_info.title}",
-      is_default:  !!params[:is_default]
+      is_default:  !!params[:is_default],
+      channel_id:  playlist_info.channel_id,
     )
 
-    PlaylistSnapshot.create_snapshot!(params[:playlist_id])
+    PlaylistSnapshot.create!(
+      playlist_id: params[:playlist_id],
+      playlist_items: PlaylistSnapshot.get_playlist_items_from_yt(params[:playlist_id])
+    )
 
     json_response(tp, :created)
   end

@@ -6,44 +6,26 @@ class PlaylistSnapshot < ApplicationRecord
   BROKEN_STATUSES = ['Deleted video', 'Private video']
 
   def self.capture_all_tracked_playlists!
-    TrackedPlaylist.all.each { |tp| ps = create_snapshot!(tp.playlist_id); post_diff!(ps); }
-  end
+    TrackedPlaylist.all.each do |tp|
+      current_playlist_items = get_working_songs(get_playlist_items_from_yt(tp.playlist_id))
+      latest_snapshot = PlaylistSnapshot.where(playlist_id: tp.playlist_id).where("created_at < ?", DateTime.now).newest
+      previous_playlist_items = get_working_songs(latest_snapshot.playlist_items)
 
-  def self.create_snapshot!(playlist_id)
-    playlist       = Yt::Playlist.new(id: playlist_id)
-    channel_id     = playlist.channel_id
-    all_songs      = playlist.playlist_items.where;
-    playlist_items = {}
+      diff = calculate_diffs(current_playlist_items, previous_playlist_items)
 
-    all_songs.each do |song|
-      song_id = song.snippet.data['resourceId']['videoId']
-      playlist_items[song_id] = song.snippet.data
+      if diff.fetch(:removed).any? || diff.fetch(:added).any?
+        PlaylistSnapshot.create!(playlist_id: tp.playlist_id, playlist_items: current_playlist_items)
+        post_diff!(diff)
+      end
     end
-
-    ps = PlaylistSnapshot.new
-    ps.playlist_id = playlist_id
-    ps.channel_id  = channel_id
-    ps.playlist_items = playlist_items
-    ps.save!
-
-    ps
   end
 
-  def self.post_diff!(snapshot)
-    previous_snapshot = PlaylistSnapshot.where(playlist_id: snapshot.playlist_id).where("created_at < ?", snapshot.created_at).newest
-    return unless previous_snapshot
-
-    previous_songs = previous_snapshot.working_songs.dup.with_indifferent_access
-    current_songs  = snapshot.working_songs.dup.with_indifferent_access
-
-    diffs = calculate_diffs(current_songs, previous_songs)
+  def self.post_diff!(diffs)
     message = create_diff_message(diffs, snapshot.playlist_id)
-    
     ::YoutubeWatcher::Slacker.post_message(message, '#happy-hood')
   end
 
   def self.calculate_diffs(current_songs, previous_songs)
-
     removed = previous_songs.reject { |k,_v| current_songs.key?(k) }.values
     added   = current_songs.reject  { |k,_v| previous_songs.key?(k) }.values
     {
@@ -68,19 +50,12 @@ class PlaylistSnapshot < ApplicationRecord
     playlists.flat_map(&:shuffled_working_songs).compact.shuffle
   end
 
-  def broken_songs
-    @broken_songs ||= playlist_items.select do |_song_id, song|
-      BROKEN_STATUSES.include?(song['title'])
-    end
-  end
-
-  def working_songs
-    @working_songs ||= playlist_items.reject do |_song_id, song|
-      BROKEN_STATUSES.include?(song['title'])
-    end
+  def self.get_working_songs(playlist_items)
+    playlist_items.reject { |_, song| BROKEN_STATUSES.include?(song['title']) }
   end
 
   def shuffled_working_songs
+    working_songs = PlaylistSnapshot.get_working_songs(playlist_id)
     songs = working_songs.slice(*working_songs.keys.shuffle)
     songs.map do |video_id, song_info|
       {
@@ -91,6 +66,19 @@ class PlaylistSnapshot < ApplicationRecord
         playlist_owner: song_info.dig('channelTitle'),
       }
     end
+  end
+
+  def self.get_playlist_items_from_yt(playlist_id)
+    playlist       = Yt::Playlist.new(id: playlist_id)
+    all_songs      = playlist.playlist_items.where;
+    playlist_items = {}
+
+    all_songs.each do |song|
+      song_id = song.snippet.data['resourceId']['videoId']
+      playlist_items[song_id] = song.snippet.data
+    end
+
+    playlist_items
   end
 
   private
