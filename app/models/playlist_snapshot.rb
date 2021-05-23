@@ -55,7 +55,7 @@ class PlaylistSnapshot < ApplicationRecord
   end
 
   def shuffled_working_songs
-    working_songs = PlaylistSnapshot.get_working_songs(playlist_id)
+    working_songs = PlaylistSnapshot.get_working_songs(playlist_items)
     songs = working_songs.slice(*working_songs.keys.shuffle)
     songs.map do |video_id, song_info|
       {
