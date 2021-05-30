@@ -9,6 +9,7 @@ class TrackedPlaylistsController < ApplicationController
 
     tp = TrackedPlaylist.create!(
       playlist_id: params[:playlist_id],
+      channel_id: playlist_info.channel_id,
       name:        "#{playlist_info.channel_title} - #{playlist_info.title}",
       is_default:  !!params[:is_default],
       channel_id:  playlist_info.channel_id,
