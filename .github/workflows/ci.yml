@@ -52,14 +52,9 @@ jobs:
 
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
-
-    - name: Cache Ruby Gems
-      uses: actions/cache@v2
       with:
-        path: vendor/bundle
-        key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-gems-
+        # runs `bundle install` and caches gems
+        bundler-cache: true
 
     - name: Bundler Config
       run: |
