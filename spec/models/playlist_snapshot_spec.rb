@@ -1,31 +1,42 @@
 require 'rails_helper'
-require 'rspec'
 
-describe PlaylistSnapshot do
-  context '.calculate_diffs' do
-    subject { PlaylistSnapshot.calculate_diffs(current_songs, previous_songs) }
+RSpec.describe PlaylistSnapshot do
+  describe '.capture_all_tracked_playlists!' do
+    subject { described_class.capture_all_tracked_playlists! }
 
-    let(:current_songs) do
+    before do
+      TrackedPlaylist.all.each(&:destroy)
+      TrackedPlaylist.create(playlist_id: 'playlist_id', name: 'channelname')
+      PlaylistSnapshot.create(playlist_id: 'playlist_id', playlist_items: {})
+      allow(described_class).to receive(:get_playlist_items_from_yt).and_return(mocked_yt_response)
+    end
+
+    after do
+      TrackedPlaylist.all.each(&:destroy)
+      PlaylistSnapshot.all.each(&:destroy)
+    end
+
+    let(:mocked_yt_response) do
       {
-        song_id_1: {song_info: {name: 'song1'}},
-        song_id_2: {song_info: {name: 'song2'}},
-        song_id_3: {song_info: {name: 'hayramloozrs'}},
+        'song_1' => {'title'=>'song_1_title',
+                     'complete'=>true,
+                     'position'=>259,
+                     'channelId'=>'playlist_owner_channel_id',
+                     'playlistId'=>'playlist_id',
+                     'resourceId'=>{'kind'=>'youtube#video', 'videoId'=>'song_1'},
+                     'thumbnails'=> {},
+                     'description'=>'some description string',
+                     'publishedAt'=>'2019-01-03T21:58:39Z',
+                     'channelTitle'=>'channelTitle',
+                     'videoOwnerChannelId'=>'channelid',
+                     'videoOwnerChannelTitle'=>'channelname'}
       }
     end
 
-    let(:previous_songs) do
-      {
-        song_id_1: {song_info: {name: 'song1'}},
-        song_id_2: {song_info: {name: 'song2'}},
-        song_id_4: {song_info: {name: 'ayylmao'}},
-      }
-    end
-
-    let(:expected_removed) { [{song_info: {name: 'ayylmao'}}] }
-    let(:expected_added)   { [{song_info: {name: 'hayramloozrs'}}] }
-
-    it 'succeeds' do
-      expect(subject).to eq({added: expected_added, removed: expected_removed})
+    it 'takes a snapshot with diffs and posts to slack' do
+      expect { subject }.to change { PlaylistSnapshot.count }.by(1)
+      expect(YoutubeWatcher::Slacker).to receive(:post_message)
+      subject
     end
   end
 end
