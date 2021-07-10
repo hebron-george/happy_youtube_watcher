@@ -1,7 +1,7 @@
 class PlaylistDifferenceCalculator
-  def self.calculate_diffs(previous_songs, current_songs)
-    removed = previous_songs.reject { |k,_v| current_songs.key?(k) }.values
-    added   = current_songs.reject  { |k,_v| previous_songs.key?(k) }.values
+  def self.calculate_diffs(current_songs, previous_songs)
+    removed = previous_songs.reject { |k,_v| current_songs.key?(k) }.values.map(&:with_indifferent_access)
+    added   = current_songs.reject  { |k,_v| previous_songs.key?(k) }.values.map(&:with_indifferent_access)
 
     diffs = { removed: removed, added: added}
     new(diffs)
