@@ -2,14 +2,6 @@ require 'rails_helper'
 require 'rspec'
 
 describe PlaylistSnapshot do
-  before do
-    # Do nothing
-  end
-
-  after do
-    # Do nothing
-  end
-
   context '.calculate_diffs' do
     subject { PlaylistSnapshot.calculate_diffs(current_songs, previous_songs) }
 
