@@ -1,5 +1,6 @@
 require 'yt'
 require 'youtube_watcher/slacker'
+require 'playlist_difference_calculator'
 
 class PlaylistSnapshot < ApplicationRecord
   belongs_to :tracked_playlist, foreign_key: :playlist_id, primary_key: :playlist_id
@@ -11,9 +12,9 @@ class PlaylistSnapshot < ApplicationRecord
       latest_snapshot = PlaylistSnapshot.where(playlist_id: tp.playlist_id).where("created_at < ?", DateTime.now).newest
       previous_playlist_items = get_working_songs(latest_snapshot.playlist_items)
 
-      diff = calculate_diffs(current_playlist_items, previous_playlist_items)
+      diff = PlaylistDifferenceCalculator.calculate_diffs(current_playlist_items, previous_playlist_items)
 
-      if diff.fetch(:removed).any? || diff.fetch(:added).any?
+      if diff.any_changes?
         PlaylistSnapshot.create!(playlist_id: tp.playlist_id, playlist_items: current_playlist_items)
         post_diff!(diff, tp.playlist_id)
       end
@@ -21,23 +22,14 @@ class PlaylistSnapshot < ApplicationRecord
   end
 
   def self.post_diff!(diffs, playlist_id)
-    message = create_diff_message(diffs.with_indifferent_access, playlist_id)
+    message = create_diff_message(diffs, playlist_id)
     ::YoutubeWatcher::Slacker.post_message(message, '#happy-hood')
-  end
-
-  def self.calculate_diffs(current_songs, previous_songs)
-    removed = previous_songs.reject { |k,_v| current_songs.key?(k) }.values
-    added   = current_songs.reject  { |k,_v| previous_songs.key?(k) }.values
-    {
-      removed: removed,
-      added:   added,
-    }
   end
 
   def self.create_diff_message(diffs, playlist_id)
     s =  [""]
-    s += ["These songs were removed:\n ```#{diffs[:removed].map { |song| "Position: #{song[:position]} - #{song[:title]} - ID(#{url(song.dig(:resourceId, :videoId))})"}.join("\n")}```"] if diffs[:removed].any?
-    s += ["These songs were added:\n```#{diffs[:added].map { |song| "Position: #{song[:position]} - #{song[:title]} - ID(#{url(song.dig(:resourceId, :videoId))})"}.join("\n")}```"]      if diffs[:added].any?
+    s += ["These songs were removed:\n ```#{diffs.removed_songs.map { |song| "Position: #{song.position} - #{song.title} - ID(#{song.url})"}.join("\n")}```"] if diffs.removed_songs.any?
+    s += ["These songs were added:\n```#{diffs.added_songs.map { |song| "Position: #{song.position} - #{song.title} - ID(#{song.url})"}.join("\n")}```"]      if diffs.added_songs.any?
 
     return '' unless s.count > 1 # Not just empty string
 
