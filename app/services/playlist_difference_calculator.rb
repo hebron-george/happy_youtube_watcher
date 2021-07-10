@@ -7,7 +7,6 @@ class PlaylistDifferenceCalculator
     new(diffs)
   end
 
-  Song = Struct.new(:position, :title, :url, keyword_init: true)
   def initialize(diffs)
     @diffs = diffs
   end
@@ -25,6 +24,8 @@ class PlaylistDifferenceCalculator
   end
 
   private
+
+  Song = Struct.new(:position, :title, :url, keyword_init: true)
 
   def create_song(song_details)
     position = song_details[:position]
